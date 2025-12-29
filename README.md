@@ -7,7 +7,7 @@
 
 ## 📽️ 프로젝트 발표 자료 (PDF)
 프로젝트의 기획 의도, 시스템 아키텍처, 핵심 기능 시연 화면이 포함된 상세 자료입니다.
-* [**👉 UNILAND 프로젝트 발표 PDF 보기**](https://github.com/ljbin0907/UNILAND/blob/main/세미%20프로젝트%20UNILAND(발표).pdf) 
+* [**👉 UNILAND 프로젝트 발표 PDF 보기**](https://github.com/Jungbin12/UNILAND/blob/master/%EC%84%B8%EB%AF%B8%20%ED%94%84%EB%A1%9C%EC%A0%9D%ED%8A%B8%20UNILAND(%EB%B0%9C%ED%91%9C).pdf) 
 
 ---
 
