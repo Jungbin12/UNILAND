@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.elon.boot.domain.property.model.store.OptionMapper">
+
+  <select id="selectOnesOption" resultType="com.elon.boot.domain.property.model.vo.PropertyOption">
+    SELECT *
+    FROM OPTION_TBL
+    WHERE PROPERTY_NO = #{id, jdbcType=NUMERIC}
+  </select>
+
+  <select id="selectOptionsByPropertyNo" resultType="com.elon.boot.domain.property.model.vo.PropertyOption">
+    SELECT *
+    FROM OPTION_TBL
+    WHERE PROPERTY_NO = #{propertyNo, jdbcType=NUMERIC}
+  </select>
+
+  <insert id="insertOption" parameterType="com.elon.boot.domain.property.model.vo.PropertyOption">
+    <selectKey keyProperty="propertyOptionNo" order="BEFORE" resultType="long">
+      SELECT SEQ_OPTION_NO.NEXTVAL FROM DUAL
+    </selectKey>
+    INSERT INTO OPTION_TBL (
+      PROPERTY_OPTION_NO, PROPERTY_NO,
+      AIR_CONDITIONER, HEATER,
+      REFRIGERATOR, MICROWAVE, INDUCTION, GAS_STOVE,
+      WASHER, DRYER, BED, DESK, WARDROBE, SHOE_RACK, TV,
+      PARKING, ELEVATOR, SECURITY, PET_ALLOWED
+    ) VALUES (
+      #{propertyOptionNo, jdbcType=NUMERIC},
+      #{propertyNo,       jdbcType=NUMERIC},
+
+      NVL(#{airConditioner, jdbcType=CHAR}, 'N'),
+      NVL(#{heater,        jdbcType=CHAR}, 'N'),
+
+      NVL(#{refrigerator,  jdbcType=CHAR}, 'N'),
+      NVL(#{microwave,     jdbcType=CHAR}, 'N'),
+      NVL(#{induction,     jdbcType=CHAR}, 'N'),
+      NVL(#{gasStove,      jdbcType=CHAR}, 'N'),
+
+      NVL(#{washer,        jdbcType=CHAR}, 'N'),
+      NVL(#{dryer,         jdbcType=CHAR}, 'N'),
+      NVL(#{bed,           jdbcType=CHAR}, 'N'),
+      NVL(#{desk,          jdbcType=CHAR}, 'N'),
+      NVL(#{wardrobe,      jdbcType=CHAR}, 'N'),
+      NVL(#{shoeRack,      jdbcType=CHAR}, 'N'),
+      NVL(#{tv,            jdbcType=CHAR}, 'N'),
+
+      NVL(#{parking,       jdbcType=CHAR}, 'N'),
+      NVL(#{elevator,      jdbcType=CHAR}, 'N'),
+      NVL(#{security,      jdbcType=CHAR}, 'N'),
+      NVL(#{petAllowed,    jdbcType=CHAR}, 'N')
+    )
+  </insert>
+</mapper>

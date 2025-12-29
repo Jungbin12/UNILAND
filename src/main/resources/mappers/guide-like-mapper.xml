@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.elon.boot.domain.community.guide.model.store.GuideLikeMapper">
+    
+    <select id="selectLikeCount" resultType="int">
+        SELECT COUNT(*)
+        FROM GUIDE_LIKE_TBL
+        WHERE GUIDE_NO = #{guideNo}
+    </select>
+    
+    <select id="isLikedByUser" resultType="int">
+        SELECT COUNT(*)
+        FROM GUIDE_LIKE_TBL
+        WHERE GUIDE_NO = #{guideNo}
+          AND USER_ID = #{userId}
+    </select>
+    
+    <insert id="insertLike">
+        INSERT INTO GUIDE_LIKE_TBL (
+            LIKE_NO,   GUIDE_NO,
+            USER_ID,
+            LIKE_DATE
+        ) VALUES (
+            SEQ_GUIDE_LIKE_NO.NEXTVAL, #{guideNo},
+            #{userId},
+            SYSDATE
+        )
+    </insert>
+    
+    <delete id="deleteLike">
+        DELETE FROM GUIDE_LIKE_TBL
+        WHERE GUIDE_NO = #{guideNo}
+          AND USER_ID = #{userId}
+    </delete>
+    
+</mapper>

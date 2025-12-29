@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.elon.boot.domain.community.guide.model.store.GuideCommentLikeMapper">
+
+    <!-- 가이드 댓글 좋아요 추가 -->
+    <insert id="insertGuideCommentLike">
+        INSERT INTO GUIDE_COMMENT_LIKE_TBL (COMMENT_ID, USER_ID, CREATED_AT)
+        VALUES (#{commentId}, #{userId}, SYSDATE)
+    </insert>
+
+    <!-- 가이드 댓글 좋아요 취소 -->
+    <delete id="deleteGuideCommentLike">
+        DELETE FROM GUIDE_COMMENT_LIKE_TBL
+        WHERE COMMENT_ID = #{commentId}
+          AND USER_ID = #{userId}
+    </delete>
+
+    <!-- 가이드 댓글 좋아요 수 조회 -->
+    <select id="selectGuideCommentLikeCount" resultType="int">
+        SELECT COUNT(*)
+        FROM GUIDE_COMMENT_LIKE_TBL
+        WHERE COMMENT_ID = #{commentId}
+    </select>
+
+    <!-- 사용자가 가이드 댓글에 좋아요 했는지 확인 -->
+    <select id="isGuideCommentLikedByUser" resultType="int">
+        SELECT COUNT(*)
+        FROM GUIDE_COMMENT_LIKE_TBL
+        WHERE COMMENT_ID = #{commentId}
+          AND USER_ID = #{userId}
+    </select>
+
+</mapper>

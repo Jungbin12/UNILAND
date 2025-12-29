@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.elon.boot.domain.inquiry.model.store.InquiryMapper">
+
+  <!-- resultMap: userType 추가 -->
+  <resultMap id="InquiryMap" type="com.elon.boot.domain.inquiry.model.vo.Inquiry">
+    <id     property="inquiryId"  	column="INQUIRY_ID"/>
+    <result property="userId"     	column="USER_ID"/>
+    <result property="inquiryType" 	column="INQUIRY_TYPE"/>
+    <result property="category"    	column="CATEGORY"/>
+    <result property="propertyId"  	column="PROPERTY_ID"/>
+    <result property="realtorId"   	column="REALTOR_ID"/>
+    <result property="title"       	column="TITLE"/>
+    <result property="content"     	column="CONTENT"/>    
+    <result property="status"      	column="STATUS"/>
+    <result property="answer"      	column="ANSWER"/>     
+    <result property="createdAt"   	column="CREATED_AT"/>
+    <result property="answeredAt"  	column="ANSWERED_AT"/>
+    <result property="userName"    	column="USER_NAME"/>
+    <result property="deleteYn"    	column="DELETE_YN"/>
+    <result property="userPhone"   	column="USER_PHONE"/>
+    <result property="readYn" 	   	column="READ_YN"/>
+    <result property="readAt" 		column="READ_AT"/>
+    <result property="propertyName" column="PROPERTY_NAME"/>
+    <result property="userType"    	column="USER_TYPE"/>
+  </resultMap>
+
+  <!-- 전체(관리자용) - INQUIRY_TYPE을 USER_TYPE으로 매핑 + 매물명 조인 -->
+  <select id="selectAllInquiriesForAdmin" resultMap="InquiryMap">
+    SELECT 
+        I.*,
+        I.INQUIRY_TYPE AS USER_TYPE,
+        P.PROPERTY_NAME
+    FROM INQUIRY_TBL I
+    LEFT JOIN PROPERTY_TBL P ON I.PROPERTY_ID = P.PROPERTY_NO
+    WHERE I.DELETE_YN = 'N'
+    ORDER BY I.CREATED_AT DESC
+  </select>
+
+  <!-- 단건 -->
+  <select id="selectInquiryById" parameterType="int" resultMap="InquiryMap">
+    SELECT 
+        I.*,
+        I.INQUIRY_TYPE AS USER_TYPE,
+        P.PROPERTY_NAME
+    FROM INQUIRY_TBL I
+    LEFT JOIN PROPERTY_TBL P ON I.PROPERTY_ID = P.PROPERTY_NO
+    WHERE I.INQUIRY_ID = #{value}
+  </select>
+
+  <!-- 사용자별 -->
+  <select id="selectInquiriesByUserId" parameterType="string" resultMap="InquiryMap">
+    SELECT 
+        I.*,
+        I.INQUIRY_TYPE AS USER_TYPE,
+        P.PROPERTY_NAME
+    FROM INQUIRY_TBL I
+    LEFT JOIN PROPERTY_TBL P ON I.PROPERTY_ID = P.PROPERTY_NO
+    WHERE I.USER_ID = #{userId}
+      AND I.DELETE_YN = 'N'
+    ORDER BY 
+        CASE WHEN I.READ_YN = 'N' THEN 0 ELSE 1 END,
+        I.CREATED_AT DESC
+  </select>
+  
+  <!-- 사용자별 관리자 문의 목록 조회 -->
+  <select id="selectAdminInquiriesByUserId" parameterType="string" resultMap="InquiryMap">
+      SELECT 
+          I.INQUIRY_ID,
+          I.USER_ID,
+          I.INQUIRY_TYPE,
+          I.CATEGORY,
+          I.PROPERTY_ID,
+          I.REALTOR_ID,
+          I.TITLE,
+          I.CONTENT,
+          I.STATUS,
+          I.ANSWER,
+          I.CREATED_AT,
+          I.ANSWERED_AT,
+          I.USER_NAME,
+          I.DELETE_YN,
+          I.USER_PHONE,
+          I.READ_YN,
+          I.READ_AT,
+          I.INQUIRY_TYPE AS USER_TYPE,
+          P.PROPERTY_NAME
+      FROM INQUIRY_TBL I
+      LEFT JOIN PROPERTY_TBL P ON I.PROPERTY_ID = P.PROPERTY_NO
+      WHERE I.USER_ID = #{userId}
+        AND I.INQUIRY_TYPE = 'ADMIN'
+        AND I.DELETE_YN = 'N'
+      ORDER BY 
+          CASE WHEN I.READ_YN = 'N' THEN 0 ELSE 1 END,
+          I.CREATED_AT DESC
+  </select>
+  
+  <!-- 사용자별 중개사 문의 목록 조회 -->
+  <select id="selectRealtorInquiriesByUserId" parameterType="string" resultMap="InquiryMap">
+      SELECT 
+          I.INQUIRY_ID,
+          I.USER_ID,
+          I.INQUIRY_TYPE,
+          I.CATEGORY,
+          I.PROPERTY_ID,
+          I.REALTOR_ID,
+          I.TITLE,
+          I.CONTENT,
+          I.STATUS,
+          I.ANSWER,
+          I.CREATED_AT,
+          I.ANSWERED_AT,
+          I.USER_NAME,
+          I.DELETE_YN,
+          I.USER_PHONE,
+          I.READ_YN,
+          I.READ_AT,
+          I.INQUIRY_TYPE AS USER_TYPE,
+          P.PROPERTY_NAME
+      FROM INQUIRY_TBL I
+      LEFT JOIN PROPERTY_TBL P ON I.PROPERTY_ID = P.PROPERTY_NO
+      WHERE I.USER_ID = #{userId}
+        AND I.INQUIRY_TYPE = 'REALTOR'
+        AND I.DELETE_YN = 'N'
+      ORDER BY 
+          CASE WHEN I.READ_YN = 'N' THEN 0 ELSE 1 END,
+          I.CREATED_AT DESC
+  </select>
+
+  <!-- 등록 -->
+  <insert id="insertInquiry" parameterType="com.elon.boot.domain.inquiry.model.vo.Inquiry">
+    INSERT INTO INQUIRY_TBL (
+      INQUIRY_ID, USER_ID, INQUIRY_TYPE, CATEGORY, PROPERTY_ID, REALTOR_ID,
+      TITLE, CONTENT, STATUS, ANSWER, CREATED_AT, ANSWERED_AT,
+      USER_NAME, DELETE_YN, USER_PHONE, READ_YN
+    )
+    VALUES (
+      INQUIRY_ID.NEXTVAL,
+      #{userId}, #{inquiryType}, 
+      #{category, jdbcType=VARCHAR},
+      #{propertyId, jdbcType=NUMERIC},
+      #{realtorId, jdbcType=VARCHAR},
+      #{title}, #{content}, NVL(#{status}, 'PENDING'), 
+      #{answer, jdbcType=CLOB},
+      SYSDATE, 
+      #{answeredAt, jdbcType=DATE},
+      #{userName}, NVL(#{deleteYn}, 'N'), #{userPhone}, NVL(#{readYn}, 'N')
+    )
+  </insert>
+
+  <!-- 답변 업데이트 -->
+  <update id="updateInquiryAnswer" parameterType="map">
+    UPDATE INQUIRY_TBL
+       SET ANSWER = #{answer},
+           STATUS = 'ANSWERED',
+           ANSWERED_AT = SYSDATE
+     WHERE INQUIRY_ID = #{inquiryId}
+  </update>
+  
+  <!-- 중개사별 문의 조회 -->
+  <select id="selectInquiriesByRealtorId" parameterType="string" resultMap="InquiryMap">
+        SELECT 
+            I.*,
+            P.PROPERTY_NAME,
+            I.INQUIRY_TYPE AS USER_TYPE
+        FROM INQUIRY_TBL I
+        LEFT JOIN PROPERTY_TBL P ON I.PROPERTY_ID = P.PROPERTY_NO
+        WHERE I.REALTOR_ID = #{value}
+          AND I.DELETE_YN = 'N'
+          AND I.INQUIRY_TYPE = 'REALTOR'
+        ORDER BY 
+            CASE WHEN I.STATUS = 'PENDING' THEN 0 ELSE 1 END,
+            I.CREATED_AT DESC
+    </select>
+
+    <!-- 중개사 전체 문의 수 조회 -->
+    <select id="countRealtorInquiries" parameterType="string" resultType="int">
+        SELECT COUNT(*)
+        FROM INQUIRY_TBL
+        WHERE REALTOR_ID = #{value}
+          AND DELETE_YN = 'N'
+          AND INQUIRY_TYPE = 'REALTOR'
+    </select>
+
+    <!-- 중개사 상태별 문의 수 조회 -->
+    <select id="countRealtorInquiriesByStatus" resultType="int">
+        SELECT COUNT(*)
+        FROM INQUIRY_TBL
+        WHERE REALTOR_ID = #{realtorId}
+          AND STATUS = #{status}
+          AND DELETE_YN = 'N'
+          AND INQUIRY_TYPE = 'REALTOR'
+    </select>
+
+    <!-- 중개사 오늘 받은 문의 수 조회 -->
+    <select id="countRealtorInquiriesToday" parameterType="string" resultType="int">
+        SELECT COUNT(*)
+        FROM INQUIRY_TBL
+        WHERE REALTOR_ID = #{value}
+          AND DELETE_YN = 'N'
+          AND INQUIRY_TYPE = 'REALTOR'
+          AND TRUNC(CREATED_AT) = TRUNC(SYSDATE)
+    </select>
+
+    <!-- 문의 읽음 처리 -->
+    <update id="updateInquiryReadStatus" parameterType="int">
+        UPDATE INQUIRY_TBL
+        SET READ_YN = 'Y',
+            READ_AT = SYSDATE
+        WHERE INQUIRY_ID = #{value}
+          AND READ_YN = 'N'
+    </update>
+    
+    <!-- 문의 삭제 (논리적 삭제) -->
+    <update id="deleteInquiry" parameterType="int">
+        UPDATE INQUIRY_TBL
+        SET DELETE_YN = 'Y'
+        WHERE INQUIRY_ID = #{inquiryId}
+    </update>
+
+    <!-- 문의 읽음 처리 -->
+    <update id="markInquiryAsRead" parameterType="int">
+        UPDATE INQUIRY_TBL
+        SET 
+            READ_YN = 'Y',
+            READ_AT = SYSDATE
+        WHERE INQUIRY_ID = #{inquiryId}
+    </update>
+
+    <!-- 문의 상태별 개수 조회 -->
+    <select id="selectInquiryCountByStatus" parameterType="string" resultType="int">
+        SELECT COUNT(*)
+        FROM INQUIRY_TBL
+        WHERE STATUS = #{status}
+          AND DELETE_YN = 'N'
+    </select>
+
+    <!-- 미읽음 문의 개수 조회 -->
+    <select id="selectUnreadInquiryCount" parameterType="string" resultType="int">
+        SELECT COUNT(*)
+        FROM INQUIRY_TBL
+        WHERE USER_ID = #{userId}
+          AND READ_YN = 'N'
+          AND DELETE_YN = 'N'
+    </select>
+
+</mapper>

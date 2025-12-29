@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.elon.boot.domain.community.notice.model.store.NoticeMapper">
+
+	<!-- ResultMap 정의 -->
+    <resultMap id="NoticeResultMap" type="com.elon.boot.domain.community.notice.model.vo.Notice">
+        <id column="NOTICE_NO" property="noticeNo"/>
+        <result column="USER_ID" property="userId"/>
+        <result column="NOTICE_SUBJECT" property="noticeSubject"/>
+        <result column="NOTICE_CONTENT" property="noticeContent"/>
+        <result column="NOTICE_WRITER" property="noticeWriter"/>
+        <result column="NOTICE_CREATEAT" property="noticeCreateat"/>
+        <result column="NOTICE_IMPORTANT" property="noticeImportant"/>
+        <result column="NOTICE_ISNEW" property="noticeIsnew"/>
+        <result column="VIEW_COUNT" property="viewCount"/>
+        <result column="DELETE_YN" property="deleteYn"/>
+    </resultMap>
+    
+    <!-- 홈페이지용 최근 공지사항 조회 -->
+    <select id="selectRecentNotices" resultType="Notice">
+	    SELECT *
+	    FROM (
+		    SELECT 
+	            *
+	        FROM NOTICE_TBL
+	        WHERE delete_yn = 'N'
+	        ORDER BY NOTICE_IMPORTANT DESC, NOTICE_CREATEAT DESC
+	    )
+	    WHERE ROWNUM &lt;= #{limit}
+	</select>
+
+    <!-- 전체 공지사항 조회 -->
+    <select id="selectAllNotices" resultMap="NoticeResultMap">
+        SELECT * FROM NOTICE_TBL
+        WHERE DELETE_YN = 'N'
+        ORDER BY NOTICE_IMPORTANT DESC, NOTICE_CREATEAT DESC
+    </select>
+
+    <!-- 중요 공지사항만 조회 -->
+    <select id="selectImportantNotices" resultMap="NoticeResultMap">
+        SELECT * FROM NOTICE_TBL
+        WHERE DELETE_YN = 'N'
+        AND NOTICE_IMPORTANT = 'Y'
+        ORDER BY NOTICE_CREATEAT DESC
+    </select>
+
+    <!-- 공지사항 상세 조회 -->
+    <select id="selectNoticeById" parameterType="int" resultMap="NoticeResultMap">
+        SELECT * FROM NOTICE_TBL
+        WHERE NOTICE_NO = #{noticeNo}
+        AND DELETE_YN = 'N'
+    </select>
+
+    <!-- 공지사항 등록 -->
+    <insert id="insertNotice" parameterType="com.elon.boot.domain.community.notice.model.vo.Notice">
+        INSERT INTO NOTICE_TBL (
+            USER_ID,
+            NOTICE_SUBJECT,
+            NOTICE_CONTENT,
+            NOTICE_WRITER,
+            NOTICE_CREATEAT,
+            NOTICE_IMPORTANT,
+            NOTICE_ISNEW,
+            VIEW_COUNT,
+            DELETE_YN
+        ) VALUES (
+            #{userId},
+            #{noticeSubject},
+            #{noticeContent},
+            #{noticeWriter},
+            SYSTIMESTAMP,
+            #{noticeImportant, jdbcType=VARCHAR},
+            #{noticeIsnew, jdbcType=VARCHAR},
+            0,
+            'N'
+        )
+    </insert>
+
+    <!-- 공지사항 수정 -->
+    <update id="updateNotice" parameterType="com.elon.boot.domain.community.notice.model.vo.Notice">
+        UPDATE NOTICE_TBL SET
+            NOTICE_SUBJECT = #{noticeSubject},
+            NOTICE_CONTENT = #{noticeContent},
+            NOTICE_IMPORTANT = #{noticeImportant, jdbcType=VARCHAR},
+            NOTICE_ISNEW = #{noticeIsnew, jdbcType=VARCHAR}
+        WHERE NOTICE_NO = #{noticeNo}
+    </update>
+
+    <!-- 공지사항 삭제 (논리 삭제) -->
+    <update id="deleteNotice" parameterType="int">
+        UPDATE NOTICE_TBL SET
+            DELETE_YN = 'Y'
+        WHERE NOTICE_NO = #{noticeNo}
+    </update>
+
+    <!-- 조회수 증가 -->
+    <update id="increaseViewCount" parameterType="int">
+        UPDATE NOTICE_TBL SET
+            VIEW_COUNT = VIEW_COUNT + 1
+        WHERE NOTICE_NO = #{noticeNo}
+    </update>
+    
+</mapper>

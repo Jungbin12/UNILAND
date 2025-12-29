@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.elon.boot.domain.interest.store.InterestMapper">
+
+  <!-- ✅ 타입 경로 수정: ...interest.vo.Interest -->
+  <!-- ✅ updatedAt 매핑 삭제 (VO에 없음) -->
+  <resultMap id="interestMap" type="com.elon.boot.domain.interest.vo.Interest">
+    <id     property="interestNo" column="INTEREST_NO"/>
+    <result property="userId"     column="USER_ID"/>
+    <result property="propertyNo" column="PROPERTY_NO"/>
+    <result property="isFavorite" column="IS_FAVORITE"/>
+    <result property="createdAt"  column="CREATED_AT"/>
+  </resultMap>
+
+  <select id="findByUserAndProperty" resultMap="interestMap">
+    SELECT *
+      FROM INTEREST_TBL
+     WHERE USER_ID = #{userId}
+       AND PROPERTY_NO = #{propertyNo}
+  </select>
+  <select id="getListById" resultMap="interestMap">
+    SELECT *
+      FROM INTEREST_TBL
+     WHERE USER_ID = #{userId}
+     AND IS_FAVORITE = 'Y'
+     ORDER BY CREATED_AT DESC
+  </select>
+
+  <insert id="insertFavorite">
+    INSERT INTO INTEREST_TBL (INTEREST_NO, USER_ID, PROPERTY_NO, IS_FAVORITE)
+    VALUES (SEQ_INTEREST_NO.NEXTVAL, #{userId}, #{propertyNo}, 'Y')
+  </insert>
+
+  <update id="toggleFavorite">
+    UPDATE INTEREST_TBL
+       SET IS_FAVORITE = CASE WHEN IS_FAVORITE = 'Y' THEN 'N' ELSE 'Y' END
+     WHERE USER_ID = #{userId}
+       AND PROPERTY_NO = #{propertyNo}
+  </update>
+
+  <update id="updateSetFavorite">
+    UPDATE INTEREST_TBL
+       SET IS_FAVORITE = #{isFavorite}
+     WHERE USER_ID = #{userId}
+       AND PROPERTY_NO = #{propertyNo}
+  </update>
+
+  <!-- 단일 파라미터(Long) → #{value} 사용 -->
+  <select id="countFavoritesOfProperty" resultType="int">
+    SELECT COUNT(*)
+      FROM INTEREST_TBL
+     WHERE PROPERTY_NO = #{value}
+       AND IS_FAVORITE = 'Y'
+  </select>
+  
+
+</mapper>

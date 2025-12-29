@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.elon.boot.domain.user.model.store.UserMapper">
+
+    <!-- 로그인: ID와 비밀번호로 회원 조회 -->
+    <select id="selectOneByLogin" resultType="com.elon.boot.domain.user.model.vo.User">
+        SELECT * FROM USER_TBL
+        WHERE USER_ID = #{userId}
+        AND USER_PASSWORD = #{userPassword}
+        AND DELETE_YN = 'N'
+    </select>
+
+    <!-- ID로 회원 조회 -->
+    <select id="selectOneById" resultType="com.elon.boot.domain.user.model.vo.User">
+        SELECT * FROM USER_TBL
+        WHERE USER_ID = #{userId}
+        AND DELETE_YN = 'N'
+    </select>
+
+    <!-- 이메일로 회원 조회 (비밀번호 찾기) -->
+    <select id="selectOneByEmail" resultType="com.elon.boot.domain.user.model.vo.User">
+        SELECT * FROM USER_TBL
+        WHERE USER_EMAIL = #{userEmail}
+        AND DELETE_YN = 'N'
+    </select>
+
+    <!-- 전화번호로 회원 조회 (비밀번호 찾기) -->
+    <select id="selectOneByPhone" resultType="com.elon.boot.domain.user.model.vo.User">
+        SELECT * FROM USER_TBL
+        WHERE USER_PHONE = #{userPhone}
+        AND DELETE_YN = 'N'
+    </select>
+
+    <!-- 회원가입 -->
+    <insert id="insertUser">
+        INSERT INTO USER_TBL 
+        VALUES (
+            #{userId},
+            #{userPassword},
+            #{userName},
+            #{birthDate, jdbcType=DATE},
+            #{userAge, jdbcType=NUMERIC},
+            #{userGender, jdbcType=VARCHAR},
+            #{userPhone, jdbcType=VARCHAR},
+            #{userEmail, jdbcType=VARCHAR},
+            #{userRegion, jdbcType=VARCHAR},
+            #{userSchool, jdbcType=VARCHAR},
+            'N',
+            'N',
+            DEFAULT,
+            DEFAULT
+            
+        )
+    </insert>
+
+    <!-- 회원정보 수정 -->
+    <update id="updateUser">
+        UPDATE USER_TBL SET
+        	USER_NAME 	= #{userName},
+        	USER_AGE	= #{userAge},
+            USER_GENDER	= #{userGender},
+            USER_PHONE 	= #{userPhone},
+            USER_EMAIL 	= #{userEmail},
+            USER_REGION	= #{userRegion},
+            USER_SCHOOL = #{userSchool},
+            UPDATED_AT = SYSTIMESTAMP
+        WHERE USER_ID = #{userId}
+    </update>
+
+    <!-- 회원 탈퇴 (DELETE_YN = 'Y') -->
+    <update id="deleteUser">
+        UPDATE USER_TBL SET
+            DELETE_YN = 'Y',
+            UPDATED_AT = SYSTIMESTAMP
+        WHERE USER_ID = #{userId}
+    </update>
+
+</mapper>

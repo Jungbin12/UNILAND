@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.elon.boot.domain.realtor.model.store.RealtorMapper">
+
+    <resultMap id="realtorResultMap" type="com.elon.boot.domain.realtor.model.vo.Realtor">
+        <id property="realtorId" column="REALTOR_ID"/>
+        <result property="realtorPassword" column="REALTOR_PASSWORD"/>
+        <result property="officeName" column="OFFICE_NAME"/>
+        <result property="realtorName" column="REALTOR_NAME"/>
+        <result property="realtorAddress" column="REALTOR_ADDRESS"/>
+        <result property="realtorPhone" column="REALTOR_PHONE"/>
+        <result property="realtorEmail" column="REALTOR_EMAIL"/>
+        <result property="businessNum" column="BUSINESS_NUM"/>
+        <result property="realtorImage" column="REALTOR_IMAGE"/>
+        <result property="realtorRegNum" column="REALTOR_REG_NUM"/>
+        <result property="createdAt" column="CREATED_AT"/>
+        <result property="updatedAt" column="UPDATED_AT"/>
+        <result property="deleteYn" column="DELETE_YN"/>
+        <result property="approvalStatus" column="APPROVAL_STATUS"/>
+    </resultMap>
+
+    <select id="countByBusinessNum" resultType="int">
+        SELECT COUNT(*)
+        FROM REALTOR_TBL
+        WHERE BUSINESS_NUM = #{businessNum, jdbcType=VARCHAR}
+    </select>
+    
+    <select id="countByRealtorRegNum" resultType="int">
+        SELECT COUNT(*)
+        FROM REALTOR_TBL
+        WHERE REALTOR_REG_NUM = #{realtorRegNum}
+    </select>
+
+    <insert id="insertRealtor" parameterType="com.elon.boot.domain.realtor.model.vo.Realtor">
+        INSERT INTO REALTOR_TBL (
+            REALTOR_ID,
+            REALTOR_PASSWORD,
+            OFFICE_NAME,
+            REALTOR_NAME,
+            REALTOR_ADDRESS,
+            REALTOR_PHONE,
+            REALTOR_EMAIL,
+            BUSINESS_NUM,
+            REALTOR_REG_NUM,
+            REALTOR_IMAGE,
+            CREATED_AT,
+            UPDATED_AT,
+            DELETE_YN,
+            APPROVAL_STATUS
+        ) VALUES (
+            #{realtorId, jdbcType=VARCHAR},
+            #{realtorPassword, jdbcType=VARCHAR},
+            #{officeName, jdbcType=VARCHAR},
+            #{realtorName, jdbcType=VARCHAR},
+            #{realtorAddress, jdbcType=VARCHAR},
+            #{realtorPhone, jdbcType=VARCHAR},
+            #{realtorEmail, jdbcType=VARCHAR},
+            #{businessNum, jdbcType=VARCHAR},
+            #{realtorRegNum, jdbcType=VARCHAR},
+            #{realtorImage, jdbcType=VARCHAR},
+            CURRENT_TIMESTAMP,
+            CURRENT_TIMESTAMP,
+            'N',
+            #{approvalStatus, jdbcType=VARCHAR}
+        )
+    </insert>
+
+    <select id="findByLoginInfo" resultMap="realtorResultMap">
+        SELECT *
+        FROM REALTOR_TBL
+        WHERE REALTOR_ID = #{realtorId}
+          AND REALTOR_PASSWORD = #{password}
+          AND BUSINESS_NUM = #{businessNumber}
+          AND DELETE_YN = 'N'
+    </select>
+
+    <select id="findById" resultMap="realtorResultMap">
+        SELECT *
+        FROM REALTOR_TBL
+        WHERE REALTOR_ID = #{realtorId}
+    </select>
+
+    <update id="updateRealtor" parameterType="com.elon.boot.domain.realtor.model.vo.Realtor">
+        UPDATE REALTOR_TBL
+        SET
+            OFFICE_NAME = #{officeName},
+            REALTOR_NAME = #{realtorName},
+            REALTOR_ADDRESS = #{realtorAddress},
+            REALTOR_PHONE = #{realtorPhone},
+            REALTOR_EMAIL = #{realtorEmail},
+            UPDATED_AT = CURRENT_TIMESTAMP
+        WHERE REALTOR_ID = #{realtorId}
+    </update>
+    
+    <update id="updateRealtorImage" parameterType="map">
+        UPDATE REALTOR_TBL
+        SET 
+            REALTOR_IMAGE = #{realtorImage},
+            UPDATED_AT = CURRENT_TIMESTAMP
+        WHERE 
+            REALTOR_ID = #{realtorId}
+    </update>
+
+    <update id="deleteRealtor" parameterType="string">
+        UPDATE REALTOR_TBL
+        SET
+            DELETE_YN = 'Y',
+            UPDATED_AT = CURRENT_TIMESTAMP
+        WHERE REALTOR_ID = #{realtorId}
+          AND DELETE_YN = 'N'
+    </update>
+
+    <!-- ⭐ 추가: 이메일로 중개사 조회 -->
+    <select id="findByEmail" resultMap="realtorResultMap">
+        SELECT *
+        FROM REALTOR_TBL
+        WHERE REALTOR_EMAIL = #{email}
+          AND DELETE_YN = 'N'
+    </select>
+
+    <!-- ⭐ 추가: 전화번호로 중개사 조회 -->
+    <select id="findByPhone" resultMap="realtorResultMap">
+        SELECT *
+        FROM REALTOR_TBL
+        WHERE REALTOR_PHONE = #{phone}
+          AND DELETE_YN = 'N'
+    </select>
+
+</mapper>

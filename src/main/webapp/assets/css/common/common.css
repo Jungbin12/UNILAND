@@ -1,0 +1,604 @@
+/* ========================================
+    UNILAND 디자인 시스템 - CSS 변수
+  ======================================== */
+:root {
+    /*  메인 컬러 */
+    --primary-purple: #667eea;
+    --primary-dark: #5568d3;
+    --secondary-purple: #764ba2;
+    --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    /*  배지 컬러 */
+    --badge-student: #667eea;
+    --badge-new: #48bb78;
+    --badge-urgent: #f56565;
+    /*  텍스트 컬러 */
+    --text-primary: #1a1a1a;
+    --text-secondary: #555;
+    --text-tertiary: #666;
+    --text-light: #999;
+    /*  배경 컬러 */
+    --bg-body: #f5f5f5;
+    --bg-white: #ffffff;
+    --bg-light-gray: #f0f0f0;
+    --bg-tag: #f5f5f5;
+    /*  테두리 컬러 */
+    --border-light: #e5e5e5;
+    --border-medium: #d0d0d0;
+    /*  간격 */
+    --spacing-xs: 6px;
+    --spacing-sm: 12px;
+    --spacing-md: 20px;
+    --spacing-lg: 24px;
+    --spacing-xl: 32px;
+    --spacing-2xl: 40px;
+    --spacing-3xl: 48px;
+    --spacing-4xl: 60px;
+    /*  모서리 반경 */
+    --radius-sm: 3px;
+    --radius-md: 6px;
+    --radius-lg: 8px;
+    --radius-xl: 12px;
+    --radius-round: 30px;
+    /*  폰트 크기 */
+    --font-xs: 11px;
+    --font-sm: 13px;
+    --font-md: 14px;
+    --font-base: 15px;
+    --font-lg: 16px;
+    --font-xl: 20px;
+    --font-2xl: 24px;
+    --font-3xl: 32px;
+    /*  레이아웃 */
+    --container-width: 1400px;
+    --card-width: 1200px;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg-body);
+    margin: 0;
+}
+
+/* ========================================
+     헤더
+  ======================================== */
+.header {
+    background: var(--bg-white);
+    padding: var(--spacing-md) 0;
+    border-bottom: 1px solid var(--border-light);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.header-content {
+    max-width: var(--container-width);
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 var(--spacing-xl);
+}
+
+.logo {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.logo-icon {
+    width: 0;
+    height: 0;
+    border-left: 12px solid transparent;
+    border-right: 12px solid transparent;
+    border-bottom: 18px solid var(--text-primary);
+}
+
+.header-nav {
+    display: flex;
+    gap: var(--spacing-md);
+    align-items: center;
+}
+
+.btn-search {
+    padding: var(--spacing-xs) var(--spacing-lg);
+    border: 1px solid var(--primary-purple);
+    background: var(--bg-white);
+    color: var(--primary-purple);
+    border-radius: var(--radius-md);
+    font-size: var(--font-md);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-search:hover {
+    background: var(--primary-purple);
+    color: var(--bg-white);
+}
+
+.btn-login {
+    color: var(--primary-purple);
+    text-decoration: underline;
+    font-size: var(--font-md);
+    cursor: pointer;
+    background: none;
+    border: none;
+    transition: all 0.3s ease;
+}
+
+.btn-login:hover {
+    color: var(--primary-dark);
+}
+
+.btn-mypage {
+    padding: var(--spacing-xs) var(--spacing-lg);
+    background: var(--gradient-primary);
+    color: var(--bg-white);
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: var(--font-md);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-mypage:hover {
+    opacity: 0.9;
+    transform: translateY(-2px);
+}
+
+/* ========================================
+     컨테이너
+  ======================================== */
+.container {
+    max-width: var(--card-width);
+    margin: var(--spacing-xl) auto;
+    background: var(--bg-white);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    overflow: hidden;
+}
+
+/* ========================================
+     탭 메뉴
+  ======================================== */
+.tab-menu {
+    display: flex;
+    border-bottom: 1px solid var(--border-light);
+    background: var(--bg-light-gray);
+    margin: 0;
+    padding: 0;
+}
+
+.tab-item {
+    flex: 1;
+    padding: var(--spacing-lg);
+    text-align: center;
+    cursor: pointer;
+    font-size: var(--font-md);
+    font-weight: 500;
+    color: var(--text-light);
+    border-bottom: 3px solid transparent;
+    transition: all 0.3s ease;
+    position: relative;
+    border: none;
+    background: none;
+}
+
+.tab-item:hover {
+    background: var(--bg-white);
+    color: var(--text-secondary);
+}
+
+.tab-item.active {
+    color: var(--primary-purple);
+    border-bottom-color: var(--primary-purple);
+    background: var(--bg-white);
+}
+
+/* ========================================
+     콘텐츠 래퍼
+  ======================================== */
+.content-wrapper {
+    padding: var(--spacing-2xl);
+    min-height: 500px;
+}
+
+/* ========================================
+     섹션 제목
+  ======================================== */
+.section-title {
+    font-size: var(--font-2xl);
+    font-weight: 600;
+    margin-bottom: var(--spacing-2xl);
+    color: var(--text-primary);
+}
+
+/* ========================================
+     프로필 섹션
+  ======================================== */
+.profile-section {
+    display: flex;
+    gap: var(--spacing-2xl);
+    margin-bottom: var(--spacing-2xl);
+    padding: var(--spacing-xl);
+    background: var(--bg-tag);
+    border-radius: var(--radius-lg);
+}
+
+.profile-image {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: var(--bg-light-gray);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-light);
+    flex-shrink: 0;
+    font-size: var(--font-sm);
+}
+
+.profile-info {
+    flex: 1;
+}
+
+.info-row {
+    display: flex;
+    padding: var(--spacing-sm) 0;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.info-label {
+    width: 100px;
+    color: var(--text-tertiary);
+    font-weight: 600;
+    font-size: var(--font-md);
+}
+
+.info-value {
+    color: var(--text-secondary);
+    flex: 1;
+    font-size: var(--font-md);
+}
+
+.edit-btn-container {
+    margin-top: var(--spacing-xl);
+    display: flex;
+    gap: var(--spacing-sm);
+}
+
+/* ========================================
+     버튼 스타일
+  ======================================== */
+.btn-primary {
+    padding: var(--spacing-sm) var(--spacing-lg);
+    background: var(--gradient-primary);
+    color: var(--bg-white);
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: var(--font-md);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    opacity: 0.9;
+    transform: translateY(-2px);
+}
+
+.btn-secondary {
+    padding: var(--spacing-sm) var(--spacing-lg);
+    background: var(--bg-white);
+    color: var(--primary-purple);
+    border: 1px solid var(--primary-purple);
+    border-radius: var(--radius-md);
+    font-size: var(--font-md);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-secondary:hover {
+    background: var(--bg-light-gray);
+}
+
+.btn-chat {
+    display: inline-block;
+    padding: var(--spacing-xs) var(--spacing-md);
+    background: var(--primary-purple);
+    color: var(--bg-white);
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: var(--font-sm);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-chat:hover {
+    background: var(--primary-dark);
+}
+
+/* ========================================
+     계약 카드
+  ======================================== */
+.contract-card {
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-xl);
+    margin-bottom: var(--spacing-lg);
+    background: var(--bg-white);
+    transition: all 0.3s ease;
+}
+
+.contract-card:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.contract-status {
+    display: inline-block;
+    padding: var(--spacing-xs) var(--spacing-md);
+    background: rgba(102, 126, 234, 0.15);
+    color: var(--primary-purple);
+    border-radius: var(--radius-round);
+    font-size: var(--font-xs);
+    font-weight: 600;
+    margin-bottom: var(--spacing-md);
+}
+
+.contract-status.completed {
+    background: rgba(72, 187, 120, 0.15);
+    color: var(--badge-new);
+}
+
+.contract-title {
+    font-size: var(--font-lg);
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-sm);
+}
+
+.contract-location {
+    color: var(--primary-purple);
+    font-weight: 500;
+    font-size: var(--font-sm);
+    margin-bottom: var(--spacing-lg);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+}
+
+.agent-info {
+    background: var(--bg-tag);
+    padding: var(--spacing-lg);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--spacing-lg);
+}
+
+.agent-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-sm) 0;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.agent-row:last-child {
+    border-bottom: none;
+}
+
+.agent-label {
+    color: var(--text-tertiary);
+    font-size: var(--font-sm);
+    font-weight: 600;
+}
+
+.agent-value {
+    color: var(--text-primary);
+    font-weight: 600;
+    font-size: var(--font-md);
+}
+
+/* ========================================
+     카드 그리드
+  ======================================== */
+.card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: var(--spacing-lg);
+}
+
+.card {
+    background: var(--bg-white);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    transform: translateY(-4px);
+}
+
+.card-image {
+    width: 100%;
+    height: 150px;
+    background: var(--bg-light-gray);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--spacing-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-light);
+}
+
+.card-title {
+    font-size: var(--font-lg);
+    font-weight: 600;
+    margin-bottom: var(--spacing-xs);
+    color: var(--text-primary);
+}
+
+.card-desc {
+    font-size: var(--font-sm);
+    color: var(--text-secondary);
+}
+
+/* ========================================
+     리스트
+  ======================================== */
+.list-item {
+    display: flex;
+    justify-content: space-between;
+    padding: var(--spacing-lg);
+    border-bottom: 1px solid var(--border-light);
+    transition: all 0.3s ease;
+}
+
+.list-item:hover {
+    background: var(--bg-tag);
+}
+
+.list-title {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: var(--font-md);
+}
+
+.list-date {
+    color: var(--text-light);
+    font-size: var(--font-sm);
+}
+
+.status-badge {
+    font-weight: 600;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--radius-md);
+    font-size: var(--font-xs);
+    background: rgba(102, 126, 234, 0.15);
+    color: var(--primary-purple);
+}
+
+.status-complete {
+    background: rgba(72, 187, 120, 0.15);
+    color: var(--badge-new);
+}
+
+.status-pending {
+    background: rgba(245, 101, 101, 0.15);
+    color: var(--badge-urgent);
+}
+
+/* ========================================
+     모달
+  ======================================== */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal.active {
+    display: flex;
+}
+
+.modal-content {
+    background: var(--bg-white);
+    padding: var(--spacing-2xl);
+    border-radius: var(--radius-lg);
+    max-width: 500px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.modal-title {
+    font-size: var(--font-2xl);
+    font-weight: 600;
+    margin-bottom: var(--spacing-xl);
+    color: var(--text-primary);
+}
+
+.form-group {
+    margin-bottom: var(--spacing-lg);
+}
+
+.form-label {
+    display: block;
+    font-size: var(--font-md);
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-xs);
+}
+
+.form-input {
+    width: 100%;
+    padding: var(--spacing-sm) var(--spacing-md);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-md);
+    font-size: var(--font-md);
+    transition: all 0.3s ease;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: var(--primary-purple);
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.modal-buttons {
+    display: flex;
+    gap: var(--spacing-sm);
+    margin-top: var(--spacing-2xl);
+}
+
+.btn-save {
+    flex: 1;
+    padding: var(--spacing-md);
+    background: var(--gradient-primary);
+    color: var(--bg-white);
+    border: none;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-save:hover {
+    opacity: 0.9;
+}
+
+.btn-cancel {
+    flex: 1;
+    padding: var(--spacing-md);
+    background: var(--bg-light-gray);
+    color: var(--text-primary);
+    border: none;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-cancel:hover {
+    background: var(--border-light);
+}

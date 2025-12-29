@@ -1,0 +1,302 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.elon.boot.domain.admin.model.store.AdminMapper">
+	
+	<!-- 공지사항 목록 -->
+	<select id="selectAllNotices">
+        SELECT * FROM NOTICE_TBL
+        WHERE DELETE_YN = 'N'
+        ORDER BY NOTICE_IMPORTANT DESC, NOTICE_CREATEAT DESC
+    </select>
+
+	<!-- 전체 회원 목록 조회 -->
+    <select id="selectAllUsers" resultType="User">
+        SELECT 
+            USER_ID,
+            USER_NAME,
+            USER_EMAIL,
+            USER_PHONE,
+            USER_REGION,
+            USER_SCHOOL,
+            ADMIN_YN,
+            DELETE_YN,
+            CREATED_AT,
+            UPDATED_AT
+        FROM USER_TBL
+        WHERE DELETE_YN = 'N'
+          AND ADMIN_YN = 'N'
+        ORDER BY CREATED_AT, USER_NAME DESC
+    </select>
+    
+    <!-- 전체 중개사 목록 조회 -->
+    <select id="selectAllRealtors" resultType="Realtor">
+        SELECT 
+            REALTOR_ID,
+            REALTOR_PASSWORD,
+            OFFICE_NAME,
+            REALTOR_NAME,
+            REALTOR_ADDRESS,
+            REALTOR_PHONE,
+            REALTOR_EMAIL,
+            BUSINESS_NUM,
+            CREATED_AT,
+            UPDATED_AT,
+            APPROVAL_STATUS
+        FROM REALTOR_TBL
+        WHERE DELETE_YN = 'N'
+        AND APPROVAL_STATUS = 'APPROVAL'
+        ORDER BY CREATED_AT, REALTOR_NAME DESC
+    </select>
+    
+    <!-- 총 일반 회원 수 -->
+    <select id="countTotalUsers" resultType="int">
+        SELECT COUNT(*)
+        FROM USER_TBL
+        WHERE delete_yn = 'N'
+    </select>
+    
+    <!-- 총 중개사 회원 수 -->
+    <select id="countTotalRealtors" resultType="int">
+        SELECT COUNT(*)
+        FROM REALTOR_TBL
+        WHERE delete_yn = 'N'
+        AND APPROVAL_STATUS = 'APPROVAL'
+    </select>
+    
+    <!-- 총 매물 수 -->
+    <select id="countTotalProperties" resultType="int">
+        SELECT COUNT(*)
+        FROM PROPERTY_TBL
+        WHERE STATUS = 'ACTIVE'
+    </select>
+    
+    <!-- 미처리 문의 수 -->
+    <select id="countPendingInquiries" resultType="int">
+        SELECT COUNT(*)
+        FROM INQUIRY_TBL
+        WHERE STATUS = 'PENDING'
+        AND DELETE_YN = 'N'
+    </select>
+
+	<!-- 회원 탈퇴 처리 -->
+    <update id="deleteUser">
+        UPDATE USER_TBL
+        SET 
+            DELETE_YN = 'Y',
+            UPDATED_AT = SYSTIMESTAMP
+        WHERE user_id = #{userId}
+    </update>
+    
+    <!-- 중개사 탈퇴 처리 -->
+    <update id="deleteRealtor">
+        UPDATE REALTOR_TBL
+        SET 
+            DELETE_YN = 'Y',
+            UPDATED_AT = SYSTIMESTAMP
+        WHERE REALTOR_ID = #{realtorId}
+    </update>
+    
+    <!-- 주별 신규 회원 통계 -->
+    <select id="selectDailyUserStats" resultType="map">
+        SELECT 
+	        TO_CHAR(created_at, 'YYYY-WW') as week,
+	        COUNT(*) as count
+	    FROM USER_TBL
+	    WHERE created_at >= SYSDATE - 30
+	      AND delete_yn = 'N'
+	    GROUP BY TO_CHAR(created_at, 'YYYY-WW')
+	    ORDER BY TO_CHAR(created_at, 'YYYY-WW')
+    </select>
+    
+    <!-- 공통 WHERE 절 -->
+    <sql id="searchCondition">
+        WHERE p.STATUS != 'DELETED'
+        <choose>
+            <when test="searchCategory == 'name' and searchKeyword != null and searchKeyword != ''">
+                AND UPPER(p.PROPERTY_NAME) LIKE '%' || UPPER(#{searchKeyword}) || '%'
+            </when>
+            <when test="searchCategory == 'type' and searchKeyword != null and searchKeyword != ''">
+                AND UPPER(p.PROPERTY_TYPE) LIKE '%' || UPPER(#{searchKeyword}) || '%'
+            </when>
+            <when test="searchCategory == 'price' and searchKeyword != null and searchKeyword != ''">
+                AND (
+                    TO_CHAR(p.DEPOSIT) LIKE '%' || #{searchKeyword} || '%'
+                    OR TO_CHAR(p.MONTHLY_RENT) LIKE '%' || #{searchKeyword} || '%'
+                )
+            </when>
+            <when test="searchCategory == 'location' and searchKeyword != null and searchKeyword != ''">
+                AND (
+                    UPPER(p.ROAD_ADDRESS) LIKE '%' || UPPER(#{searchKeyword}) || '%'
+                    OR UPPER(p.PROVINCE) LIKE '%' || UPPER(#{searchKeyword}) || '%'
+                    OR UPPER(p.DISTRICT) LIKE '%' || UPPER(#{searchKeyword}) || '%'
+                )
+            </when>
+            <when test="searchCategory == 'owner' and searchKeyword != null and searchKeyword != ''">
+                AND (
+                    UPPER(r.REALTOR_NAME) LIKE '%' || UPPER(#{searchKeyword}) || '%'
+                    OR UPPER(u.USER_NAME) LIKE '%' || UPPER(#{searchKeyword}) || '%'
+                )
+            </when>
+            <when test="searchCategory == 'contact' and searchKeyword != null and searchKeyword != ''">
+                AND (
+                    r.PHONE LIKE '%' || #{searchKeyword} || '%'
+                    OR u.PHONE LIKE '%' || #{searchKeyword} || '%'
+                )
+            </when>
+            <when test="searchCategory == 'date' and searchKeyword != null and searchKeyword != ''">
+                AND TO_CHAR(p.CREATED_AT, 'YYYY-MM-DD') LIKE '%' || #{searchKeyword} || '%'
+            </when>
+        </choose>
+    </sql>
+
+    <!-- 전체 개수 조회 (페이징용) -->
+    <select id="countProperties" resultType="long">
+        SELECT COUNT(*)
+        FROM PROPERTY_TBL p
+        LEFT JOIN REALTOR_TBL r ON p.REALTOR_ID = r.REALTOR_ID
+        LEFT JOIN USER_TBL u ON p.USER_ID = u.USER_ID
+        <include refid="searchCondition"/>
+    </select>
+
+    <!-- 페이징 처리된 매물 목록 조회 -->
+    <select id="selectPropertyListWithPaging" resultType="com.elon.boot.controller.dto.admin.PropertyAdminDTO">
+        SELECT * FROM (
+            SELECT 
+                ROWNUM AS rnum,
+                sub.*
+            FROM (
+                SELECT 
+                    p.PROPERTY_NO as propertyNo,
+                    p.PROPERTY_NAME as propertyName,
+                    p.PROPERTY_TYPE as propertyType,
+                    p.DEPOSIT as deposit,
+                    p.MONTHLY_RENT as monthlyRent,
+                    p.ROAD_ADDRESS as roadAddress,
+                    p.PROVINCE as province,
+                    p.DISTRICT as district,
+                    p.STATUS as status,
+                    p.CREATED_AT as createdAt,
+                    p.REALTOR_ID as realtorId,
+                    p.USER_ID as userId,
+                    CASE 
+                        WHEN p.REALTOR_ID IS NOT NULL THEN r.REALTOR_NAME
+                        WHEN p.USER_ID IS NOT NULL THEN u.USER_NAME
+                    END as ownerName,
+                    CASE 
+                        WHEN p.REALTOR_ID IS NOT NULL THEN '중개사'
+                        ELSE '일반'
+                    END as ownerType,
+                    CASE 
+                        WHEN p.REALTOR_ID IS NOT NULL THEN r.REALTOR_PHONE
+                        WHEN p.USER_ID IS NOT NULL THEN u.USER_PHONE
+                    END as ownerContact
+                FROM PROPERTY_TBL p
+                LEFT JOIN REALTOR_TBL r ON p.REALTOR_ID = r.REALTOR_ID
+                LEFT JOIN USER_TBL u ON p.USER_ID = u.USER_ID
+                <include refid="searchCondition"/>
+                ORDER BY p.CREATED_AT DESC
+            ) sub
+            WHERE ROWNUM <![CDATA[<=]]> #{offset} + #{size}
+        )
+        WHERE rnum > #{offset}
+    </select>
+
+    <!-- 관리자 매물 목록 조회 (DELETED 제외) - 페이징 없음 -->
+    <select id="selectPropertyListForAdmin" resultType="com.elon.boot.controller.dto.admin.PropertyAdminDTO">
+        SELECT 
+            p.PROPERTY_NO as propertyNo,
+            p.PROPERTY_NAME as propertyName,
+            p.PROPERTY_TYPE as propertyType,
+            p.DEPOSIT as deposit,
+            p.MONTHLY_RENT as monthlyRent,
+            p.ROAD_ADDRESS as roadAddress,
+            p.PROVINCE as province,
+            p.DISTRICT as district,
+            p.STATUS as status,
+            p.CREATED_AT as createdAt,
+            p.REALTOR_ID as realtorId,
+            p.USER_ID as userId,
+            CASE 
+                WHEN p.REALTOR_ID IS NOT NULL THEN r.REALTOR_NAME
+                WHEN p.USER_ID IS NOT NULL THEN u.USER_NAME
+            END as ownerName,
+            CASE 
+                WHEN p.REALTOR_ID IS NOT NULL THEN '중개사'
+                ELSE '일반'
+            END as ownerType,
+            CASE 
+                WHEN p.REALTOR_ID IS NOT NULL THEN r.PHONE
+                WHEN p.USER_ID IS NOT NULL THEN u.PHONE
+            END as ownerContact
+        FROM PROPERTY_TBL p
+        LEFT JOIN REALTOR_TBL r ON p.REALTOR_ID = r.REALTOR_ID
+        LEFT JOIN USER_TBL u ON p.USER_ID = u.USER_ID
+        WHERE p.STATUS != 'DELETED'
+        ORDER BY p.CREATED_AT DESC
+    </select>
+
+    <!-- 매물 상태 변경 (수정/삭제) -->
+    <update id="updatePropertyStatus">
+        UPDATE PROPERTY_TBL
+        SET 
+            STATUS = #{status},
+            UPDATED_AT = SYSTIMESTAMP
+            <if test="status == 'DELETED'">
+                , DELETED_AT = SYSTIMESTAMP
+            </if>
+        WHERE PROPERTY_NO = #{propertyNo}
+    </update>
+
+    <!-- 매물 상세 조회 (필요 시) -->
+    <select id="selectPropertyByNo" resultType="com.elon.boot.domain.property.model.vo.Property">
+        SELECT * FROM PROPERTY_TBL
+        WHERE PROPERTY_NO = #{propertyNo}
+    </select>
+    
+    <!-- 상태별 중개사 조회 -->
+    <select id="selectRealtorsByStatus" resultType="Realtor">
+        SELECT 
+            REALTOR_ID,
+            OFFICE_NAME,
+            REALTOR_NAME,
+            REALTOR_ADDRESS,
+            REALTOR_PHONE,
+            REALTOR_EMAIL,
+            BUSINESS_NUM,
+            CREATED_AT,
+            APPROVAL_STATUS
+        FROM REALTOR_TBL
+        WHERE APPROVAL_STATUS = #{approvalStatus}
+        ORDER BY CREATED_AT DESC
+    </select>
+    
+    <!-- 중개사 승인 상태 변경 -->
+    <update id="updateRealtorApprovalStatus">
+        UPDATE REALTOR_TBL
+        SET 
+            APPROVAL_STATUS = #{approvalStatus}
+        WHERE REALTOR_ID = #{realtorId}
+    </update>
+    
+    <!-- 중개사 상세 정보 조회 -->
+	<select id="selectRealtorById" parameterType="string" resultType="Realtor">
+	    SELECT 
+	        REALTOR_ID,
+	        REALTOR_PASSWORD,
+	        REALTOR_NAME,
+	        OFFICE_NAME,
+	        REALTOR_ADDRESS,
+	        REALTOR_PHONE,
+	        REALTOR_EMAIL,
+	        REALTOR_REG_NUM,
+	        BUSINESS_NUM,
+	        APPROVAL_STATUS,
+	        CREATED_AT,
+	        UPDATED_AT
+	    FROM REALTOR_TBL    <!-- REALTOR를 REALTOR_TBL로 수정! -->
+	    WHERE REALTOR_ID = #{realtorId}
+	</select>
+    
+</mapper>

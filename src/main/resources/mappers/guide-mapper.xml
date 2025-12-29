@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.elon.boot.domain.community.guide.model.store.GuideMapper">
+
+<!-- ResultMap 정의 -->
+<resultMap id="guideResultMap" type="com.elon.boot.domain.community.guide.model.vo.Guide">
+    <id property="guideNo" column="GUIDE_NO"/>
+    <result property="userId" column="USER_ID"/>
+    <result property="guideCategory" column="GUIDE_CATEGORY"/>
+    <result property="guideTitle" column="GUIDE_TITLE"/>
+    <result property="guideContent" column="GUIDE_CONTENT"/>
+    <result property="viewCount" column="VIEW_COUNT"/>
+    <result property="likeCount" column="LIKE_COUNT"/>
+    <result property="commentCount" column="COMMENT_COUNT"/>
+    <result property="isHot" column="IS_HOT"/>
+    <result property="writeDate" column="WRITE_DATE"/>
+    <result property="updateDate" column="UPDATE_DATE"/>
+    <result property="deleteYn" column="DELETE_YN"/>
+</resultMap>
+
+<!-- 가이드 등록 -->
+<insert id="insertGuide" parameterType="Guide">
+    INSERT INTO GUIDE_TBL (
+        GUIDE_NO,
+        USER_ID,
+        GUIDE_CATEGORY,
+        GUIDE_TITLE,
+        GUIDE_CONTENT,
+        VIEW_COUNT,
+        LIKE_COUNT,
+        COMMENT_COUNT,
+        IS_HOT,
+        WRITE_DATE,
+        DELETE_YN
+    ) VALUES (
+        SEQ_GUIDE_NO.NEXTVAL,
+        #{userId},
+        #{guideCategory},
+        #{guideTitle},
+        #{guideContent},
+        0,
+        0,
+        0,
+        'N',
+        SYSDATE,
+        'N'
+    )
+</insert>
+
+<!-- 가이드 수정 -->
+<update id="updateGuide" parameterType="Guide">
+    UPDATE GUIDE_TBL
+    SET GUIDE_CATEGORY = #{guideCategory},
+        GUIDE_TITLE = #{guideTitle},
+        GUIDE_CONTENT = #{guideContent},
+        UPDATE_DATE = SYSDATE
+    WHERE GUIDE_NO = #{guideNo}
+      AND DELETE_YN = 'N'
+</update>
+
+<!-- 가이드 삭제 (논리적 삭제) -->
+<update id="deleteGuide" parameterType="int">
+    UPDATE GUIDE_TBL
+    SET DELETE_YN = 'Y',
+        UPDATE_DATE = SYSDATE
+    WHERE GUIDE_NO = #{guideNo}
+</update>
+
+<!-- [추가] 상세 조회용 ResultMap (조인 컬럼 포함) -->
+<resultMap id="guideDetailResultMap" type="com.elon.boot.domain.community.guide.model.vo.Guide" extends="guideResultMap">
+    <result property="authorNickname" column="AUTHOR_NICKNAME"/>
+    <result property="categoryName" column="CATEGORY_NAME"/>
+</resultMap>
+
+<!-- [추가] 게시글 전체 개수 조회 -->
+<select id="selectGuideCount" resultType="_int">
+    SELECT COUNT(*)
+    FROM GUIDE_TBL
+    WHERE DELETE_YN = 'N'
+    <if test="category != null and category != ''">
+        AND GUIDE_CATEGORY = #{category}
+    </if>
+    <if test="keyword != null and keyword != ''">
+        AND (
+            GUIDE_TITLE LIKE '%' || #{keyword} || '%'
+            OR GUIDE_CONTENT LIKE '%' || #{keyword} || '%'
+        )
+    </if>
+</select>
+
+<!-- [수정 없음] 게시글 목록 조회 (RowBounds용) -->
+<select id="selectGuideList" resultMap="guideResultMap">
+    SELECT
+        GUIDE_NO,
+        USER_ID,
+        GUIDE_CATEGORY,
+        GUIDE_TITLE,
+        GUIDE_CONTENT,
+        VIEW_COUNT,
+        LIKE_COUNT,
+        COMMENT_COUNT,
+        IS_HOT,
+        WRITE_DATE,
+        UPDATE_DATE,
+        DELETE_YN
+    FROM GUIDE_TBL
+    WHERE DELETE_YN = 'N'
+    <if test="category != null and category != ''">
+        AND GUIDE_CATEGORY = #{category}
+    </if>
+    <if test="keyword != null and keyword != ''">
+        AND (
+            GUIDE_TITLE LIKE '%' || #{keyword} || '%'
+            OR GUIDE_CONTENT LIKE '%' || #{keyword} || '%'
+        )
+    </if>
+    ORDER BY
+        CASE WHEN IS_HOT = 'Y' THEN 0 ELSE 1 END,
+        WRITE_DATE DESC
+</select>
+
+<!-- [수정 없음] 인기글 TOP 5 조회 -->
+<select id="selectPopularGuides" resultMap="guideResultMap">
+    SELECT *
+    FROM (
+        SELECT
+            GUIDE_NO,
+            USER_ID,
+            GUIDE_CATEGORY,
+            GUIDE_TITLE,
+            GUIDE_CONTENT,
+            VIEW_COUNT,
+            LIKE_COUNT,
+            COMMENT_COUNT,
+            IS_HOT,
+            WRITE_DATE,
+            UPDATE_DATE,
+            DELETE_YN
+        FROM GUIDE_TBL
+        WHERE DELETE_YN = 'N'
+        ORDER BY
+            (VIEW_COUNT * 1 + LIKE_COUNT * 3 + COMMENT_COUNT * 2) DESC,
+            WRITE_DATE DESC
+    )
+    WHERE ROWNUM <![CDATA[<=]]> 5
+</select>
+
+<!-- ============================================ -->
+<!-- 가이드 상세 관련 쿼리 -->
+<!-- ============================================ -->
+
+<!-- 가이드 상세 조회 (작성자 이름, 카테고리명 조인) -->
+<select id="selectGuideDetail" resultMap="guideDetailResultMap">
+    SELECT
+        g.GUIDE_NO,
+        g.USER_ID,
+        g.GUIDE_CATEGORY,
+        g.GUIDE_TITLE,
+        g.GUIDE_CONTENT,
+        g.VIEW_COUNT,
+        g.LIKE_COUNT,
+        g.COMMENT_COUNT,
+        g.IS_HOT,
+        g.WRITE_DATE,
+        g.UPDATE_DATE,
+        g.DELETE_YN,
+        u.USER_NAME AS AUTHOR_NICKNAME,
+        gc.CATEGORY_NAME AS CATEGORY_NAME
+    FROM GUIDE_TBL g
+    LEFT JOIN USER_TBL u ON g.USER_ID = u.USER_ID
+    LEFT JOIN GUIDE_CATEGORY_TBL gc ON g.GUIDE_CATEGORY = gc.CATEGORY_CODE
+    WHERE g.GUIDE_NO = #{guideNo}
+    AND g.DELETE_YN = 'N'
+</select>
+
+<!-- 조회수 증가 -->
+<update id="increaseViewCount">
+    UPDATE GUIDE_TBL
+    SET VIEW_COUNT = VIEW_COUNT + 1
+    WHERE GUIDE_NO = #{guideNo}
+</update>
+
+<!-- 사용자 좋아요 여부 확인 -->
+<select id="checkUserLike" resultType="_int">
+    SELECT COUNT(*)
+    FROM GUIDE_LIKE_TBL
+    WHERE GUIDE_NO = #{guideNo}
+    AND USER_ID = #{userId}
+</select>
+
+<!-- 이전 글 조회 -->
+<select id="selectPrevGuide" resultMap="guideResultMap">
+    SELECT *
+    FROM (
+        SELECT
+            GUIDE_NO,
+            GUIDE_TITLE
+        FROM GUIDE_TBL
+        WHERE GUIDE_NO <![CDATA[<]]> #{guideNo}
+        AND DELETE_YN = 'N'
+        ORDER BY GUIDE_NO DESC
+    )
+    WHERE ROWNUM = 1
+</select>
+
+<!-- 다음 글 조회 -->
+<select id="selectNextGuide" resultMap="guideResultMap">
+    SELECT *
+    FROM (
+        SELECT
+            GUIDE_NO,
+            GUIDE_TITLE
+        FROM GUIDE_TBL
+        WHERE GUIDE_NO <![CDATA[>]]> #{guideNo}
+        AND DELETE_YN = 'N'
+        ORDER BY GUIDE_NO ASC
+    )
+    WHERE ROWNUM = 1
+</select>
+
+<!-- 좋아요 개수를 GUIDE_TBL에 동기화 -->
+<update id="updateLikeCount">
+    UPDATE GUIDE_TBL
+    SET LIKE_COUNT = (SELECT COUNT(*) FROM GUIDE_LIKE_TBL WHERE GUIDE_NO = #{guideNo})
+    WHERE GUIDE_NO = #{guideNo}
+</update>
+
+</mapper>

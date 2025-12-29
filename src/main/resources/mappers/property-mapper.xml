@@ -1,0 +1,444 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.elon.boot.domain.property.model.store.PropertyMapper">
+
+  <select id="selectOneByNo" resultType="com.elon.boot.domain.property.model.vo.Property">
+    SELECT *
+    FROM PROPERTY_TBL
+    WHERE PROPERTY_NO = #{id, jdbcType=NUMERIC}
+  </select>
+   <select id="selectImagesByPropertyNo"
+           parameterType="long"
+           resultType="com.elon.boot.domain.property.model.vo.PropertyImg">
+     SELECT
+       IMG_NO            AS imgNo,
+       PROPERTY_NO       AS propertyNo,
+       IMG_PATH          AS imgPath,
+       IMG_RENAME        AS imgRename,
+       IMG_ORIGINAL_NAME AS imgOriginalName,
+       IMG_ORDER         AS imgOrder
+     FROM PROPERTIES_IMG_TBL
+     WHERE PROPERTY_NO = #{id}
+     ORDER BY IMG_ORDER ASC, IMG_NO ASC
+   </select>
+   <select id="selectRealtorById" resultType="com.elon.boot.domain.realtor.model.vo.Realtor">
+      SELECT * FROM REALTOR_TBL
+      WHERE REALTOR_ID = #{rId}
+   </select>
+
+
+  <select id="selectOnesOption" resultType="com.elon.boot.domain.property.model.vo.PropertyOption">
+    SELECT *
+    FROM OPTION_TBL
+    WHERE PROPERTY_NO = #{id, jdbcType=NUMERIC}
+  </select>
+
+  <select id="selectOnesImg" resultType="com.elon.boot.domain.property.model.vo.PropertyImg">
+    SELECT *
+    FROM (
+        SELECT *
+        FROM PROPERTIES_IMG_TBL
+        WHERE PROPERTY_NO = #{id, jdbcType=NUMERIC}
+        ORDER BY IMG_ORDER ASC
+    )
+    WHERE ROWNUM = 1
+  </select>
+
+  <select id="selectAllProperties" resultType="com.elon.boot.domain.property.model.vo.Property">
+    SELECT *
+    FROM PROPERTY_TBL
+    WHERE STATUS = 'ACTIVE'
+    ORDER BY CREATED_AT DESC
+  </select>
+
+  <select id="selectPropertiesWithFilter" resultType="com.elon.boot.domain.property.model.vo.Property">
+    SELECT p.*
+    FROM PROPERTY_TBL p
+    <where>
+      p.STATUS = 'ACTIVE'
+
+      <if test="filter.regions != null and filter.regions.size() > 0">
+        AND p.DISTRICT IN
+        <foreach collection="filter.regions" item="region" open="(" separator="," close=")">
+          #{region}
+        </foreach>
+      </if>
+
+      <if test="filter.depositMin != null">
+        AND p.DEPOSIT >= #{filter.depositMin}
+      </if>
+      <if test="filter.depositMax != null">
+        AND p.DEPOSIT <![CDATA[<=]]> #{filter.depositMax}
+      </if>
+
+      <if test="filter.rentMin != null">
+        AND p.MONTHLY_RENT >= #{filter.rentMin}
+      </if>
+      <if test="filter.rentMax != null">
+        AND p.MONTHLY_RENT <![CDATA[<=]]> #{filter.rentMax}
+      </if>
+
+      <if test="filter.propertyTypes != null and filter.propertyTypes.size() > 0">
+        AND p.PROPERTY_TYPE IN
+        <foreach collection="filter.propertyTypes" item="type" open="(" separator="," close=")">
+          #{type}
+        </foreach>
+      </if>
+
+      <if test="filter.studentPref != null and filter.studentPref == true">
+        AND p.STUDENT_PREF = 'Y'
+      </if>
+
+      <if test="filter.shortCont != null and filter.shortCont == true">
+        AND p.SHORT_CONT = 'Y'
+      </if>
+
+      <if test="filter.airConditioner != null and filter.airConditioner == true">
+        AND EXISTS (SELECT 1 FROM OPTION_TBL o WHERE o.PROPERTY_NO = p.PROPERTY_NO AND o.AIR_CONDITIONER = 'Y')
+      </if>
+      <if test="filter.heater != null and filter.heater == true">
+        AND EXISTS (SELECT 1 FROM OPTION_TBL o WHERE o.PROPERTY_NO = p.PROPERTY_NO AND o.HEATER = 'Y')
+      </if>
+      <if test="filter.refrigerator != null and filter.refrigerator == true">
+        AND EXISTS (SELECT 1 FROM OPTION_TBL o WHERE o.PROPERTY_NO = p.PROPERTY_NO AND o.REFRIGERATOR = 'Y')
+      </if>
+      <if test="filter.microwave != null and filter.microwave == true">
+        AND EXISTS (SELECT 1 FROM OPTION_TBL o WHERE o.PROPERTY_NO = p.PROPERTY_NO AND o.MICROWAVE = 'Y')
+      </if>
+      <if test="filter.induction != null and filter.induction == true">
+        AND EXISTS (SELECT 1 FROM OPTION_TBL o WHERE o.PROPERTY_NO = p.PROPERTY_NO AND o.INDUCTION = 'Y')
+      </if>
+      <if test="filter.gasStove != null and filter.gasStove == true">
+        AND EXISTS (SELECT 1 FROM OPTION_TBL o WHERE o.PROPERTY_NO = p.PROPERTY_NO AND o.GAS_STOVE = 'Y')
+      </if>
+      <if test="filter.washer != null and filter.washer == true">
+        AND EXISTS (SELECT 1 FROM OPTION_TBL o WHERE o.PROPERTY_NO = p.PROPERTY_NO AND o.WASHER = 'Y')
+      </if>
+      <if test="filter.dryer != null and filter.dryer == true">
+        AND EXISTS (SELECT 1 FROM OPTION_TBL o WHERE o.PROPERTY_NO = p.PROPERTY_NO AND o.DRYER = 'Y')
+      </if>
+      <if test="filter.bed != null and filter.bed == true">
+        AND EXISTS (SELECT 1 FROM OPTION_TBL o WHERE o.PROPERTY_NO = p.PROPERTY_NO AND o.BED = 'Y')
+      </if>
+      <if test="filter.desk != null and filter.desk == true">
+        AND EXISTS (SELECT 1 FROM OPTION_TBL o WHERE o.PROPERTY_NO = p.PROPERTY_NO AND o.DESK = 'Y')
+      </if>
+      <if test="filter.wardrobe != null and filter.wardrobe == true">
+        AND EXISTS (SELECT 1 FROM OPTION_TBL o WHERE o.PROPERTY_NO = p.PROPERTY_NO AND o.WARDROBE = 'Y')
+      </if>
+      <if test="filter.shoeRack != null and filter.shoeRack == true">
+        AND EXISTS (SELECT 1 FROM OPTION_TBL o WHERE o.PROPERTY_NO = p.PROPERTY_NO AND o.SHOE_RACK = 'Y')
+      </if>
+      <if test="filter.tv != null and filter.tv == true">
+        AND EXISTS (SELECT 1 FROM OPTION_TBL o WHERE o.PROPERTY_NO = p.PROPERTY_NO AND o.TV = 'Y')
+      </if>
+      <if test="filter.parking != null and filter.parking == true">
+        AND EXISTS (SELECT 1 FROM OPTION_TBL o WHERE o.PROPERTY_NO = p.PROPERTY_NO AND o.PARKING = 'Y')
+      </if>
+      <if test="filter.elevator != null and filter.elevator == true">
+        AND EXISTS (SELECT 1 FROM OPTION_TBL o WHERE o.PROPERTY_NO = p.PROPERTY_NO AND o.ELEVATOR = 'Y')
+      </if>
+      <if test="filter.security != null and filter.security == true">
+        AND EXISTS (SELECT 1 FROM OPTION_TBL o WHERE o.PROPERTY_NO = p.PROPERTY_NO AND o.SECURITY = 'Y')
+      </if>
+      <if test="filter.petAllowed != null and filter.petAllowed == true">
+        AND EXISTS (SELECT 1 FROM OPTION_TBL o WHERE o.PROPERTY_NO = p.PROPERTY_NO AND o.PET_ALLOWED = 'Y')
+      </if>
+    </where>
+    ORDER BY p.CREATED_AT DESC
+  </select>
+  <select id="selectListByNoList" resultType="com.elon.boot.domain.property.model.vo.Property">
+     SELECT *
+     FROM PROPERTY_TBL
+     <where>
+       <if test="list != null and list.size() > 0">
+         PROPERTY_NO IN
+       <foreach collection="list" item="no" open="(" separator="," close=")">
+         #{no}
+       </foreach>
+     </if>
+     <if test="list == null or list.size() == 0">
+       1 = 0
+     </if>
+   </where>
+  </select>
+    <select id="getImgListByNoList" resultType="com.elon.boot.domain.property.model.vo.PropertyImg">
+     SELECT *
+     FROM PROPERTIES_IMG_TBL
+     <where>
+       <if test="list != null and list.size() > 0">
+         PROPERTY_NO IN
+       <foreach collection="list" item="no" open="(" separator="," close=")">
+         #{no}
+       </foreach>
+     </if>
+     <if test="list == null or list.size() == 0">
+       1 = 0
+     </if>
+   </where>
+  </select>
+
+  <insert id="insertProperty" parameterType="com.elon.boot.domain.property.model.vo.Property">
+    <selectKey keyProperty="propertyNo" order="BEFORE" resultType="long">
+      SELECT SEQ_PROPERTY_NO.NEXTVAL FROM DUAL
+    </selectKey>
+
+    INSERT INTO PROPERTY_TBL (
+      PROPERTY_NO, REALTOR_ID,
+      PROPERTY_NAME, PROPERTY_TYPE,
+      ROOM, BATHROOM, FLOOR, TOTAL_FLOOR,
+      CONSTRUCTION_YEAR, AVAILABLE_DATE,
+      STUDENT_PREF, SHORT_CONT,
+      PRICE_TYPE, DEPOSIT, MONTHLY_RENT,
+      MAINTENANCE_FEE, MAINTENANCE_INCL,
+      ROAD_ADDRESS, PARCEL_ADDRESS, ADDRESS_DETAIL,
+      PROVINCE, DISTRICT,
+      LATITUDE, LONGITUDE,
+      CONTRACT_AREA, DESCRIPTION,
+      STATUS, CREATED_AT
+    ) VALUES (
+      #{propertyNo,       jdbcType=NUMERIC},
+      #{realtorId,        jdbcType=VARCHAR},
+
+      #{propertyName,     jdbcType=VARCHAR},
+      #{propertyType,     jdbcType=VARCHAR},
+
+      #{room,             jdbcType=NUMERIC},
+      #{bathroom,         jdbcType=NUMERIC},
+      #{floor,            jdbcType=NUMERIC},
+      #{totalFloor,       jdbcType=NUMERIC},
+
+      #{constructionYear, jdbcType=VARCHAR},
+      #{availableDate,    jdbcType=VARCHAR},
+
+      #{studentPref,      jdbcType=VARCHAR},   #{shortCont,        jdbcType=VARCHAR},   #{priceType,        jdbcType=VARCHAR},
+      #{deposit,          jdbcType=NUMERIC},
+      #{monthlyRent,      jdbcType=NUMERIC},
+
+      #{maintenanceFee,   jdbcType=NUMERIC},
+      #{maintenanceIncl,  jdbcType=VARCHAR},   #{roadAddress,      jdbcType=VARCHAR},
+      #{parcelAddress,    jdbcType=VARCHAR},   #{addressDetail,    jdbcType=VARCHAR},
+
+      #{province,         jdbcType=VARCHAR},
+      #{district,         jdbcType=VARCHAR},
+
+      #{latitude,         jdbcType=NUMERIC},
+      #{longitude,        jdbcType=NUMERIC},
+
+      #{contractArea,     jdbcType=NUMERIC},
+      #{description,      jdbcType=CLOB},      'ACTIVE',
+      SYSTIMESTAMP
+    )
+  </insert>
+
+  <insert id="insertPropertyImages">
+    INSERT INTO PROPERTIES_IMG_TBL
+    SELECT SEQ_PROPERTIES_IMG_NO.NEXTVAL, BI.*
+    FROM (
+      <foreach collection="list" item="img" separator=" UNION ALL ">
+        SELECT
+          #{img.propertyNo,     jdbcType=NUMERIC}  AS PROPERTY_NO,
+          #{img.imgPath,        jdbcType=VARCHAR}  AS IMG_PATH,
+          #{img.imgRename,      jdbcType=VARCHAR}  AS IMG_RENAME,
+          #{img.imgOriginalName,jdbcType=VARCHAR}  AS IMG_ORIGINAL_NAME,
+          #{img.imgOrder,       jdbcType=NUMERIC}  AS IMG_ORDER
+        FROM DUAL
+      </foreach>
+    ) BI
+  </insert>
+
+  <select id="selectPropertyStatsByRealtorId" resultType="map">
+    SELECT
+        COUNT(CASE WHEN STATUS IN ('ACTIVE', 'RESERVED', 'COMPLETED') THEN 1 END) AS ALL_COUNT,
+        COUNT(CASE WHEN STATUS = 'ACTIVE' THEN 1 END) AS ACTIVE_COUNT,
+        COUNT(CASE WHEN STATUS = 'RESERVED' THEN 1 END) AS RESERVED_COUNT,
+        COUNT(CASE WHEN STATUS = 'COMPLETED' THEN 1 END) AS COMPLETED_COUNT
+    FROM PROPERTY_TBL
+    WHERE REALTOR_ID = #{realtorId}
+    AND STATUS != 'DELETED'
+  </select>
+
+  <select id="selectPropertyCount" resultType="_int">
+    SELECT COUNT(*)
+    FROM PROPERTY_TBL
+    <include refid="propertySearchWhere"/>
+  </select>
+
+  <select id="selectPropertyList" resultType="com.elon.boot.domain.property.model.vo.Property">
+    <choose>
+        <when test="startRow != null and limit != null">
+            <!-- 페이징이 있는 경우 -->
+            SELECT *
+            FROM (
+                SELECT
+                    ROWNUM RNUM, T.*,
+                    -- 썸네일 경로만 조회
+                    (SELECT IMG_PATH FROM PROPERTIES_IMG_TBL PI WHERE PI.PROPERTY_NO = T.PROPERTY_NO AND PI.IMG_ORDER = 0 AND ROWNUM = 1) AS THUMBNAILPATH
+                FROM (
+                    SELECT
+                        PROPERTY_NO, REALTOR_ID, PROPERTY_NAME, PROPERTY_TYPE,
+                        DEPOSIT, MONTHLY_RENT, ROAD_ADDRESS, CONTRACT_AREA,
+                        STATUS, CREATED_AT, USER_ID, CONTRACT_STATUS, CONTRACT_AT
+                    FROM PROPERTY_TBL
+                    <include refid="propertySearchWhere"/>
+                    ORDER BY
+                        <choose>
+                            <when test="sort == 'PRICE_ASC'">DEPOSIT ASC, MONTHLY_RENT ASC</when>
+                            <when test="sort == 'PRICE_DESC'">DEPOSIT DESC, MONTHLY_RENT DESC</when>
+                            <otherwise>CREATED_AT DESC</otherwise>
+                        </choose>
+                ) T
+            )
+            WHERE RNUM BETWEEN #{startRow} + 1 AND #{startRow} + #{limit}
+        </when>
+        <otherwise>
+            <!-- 페이징이 없는 경우 (전체 조회) -->
+            SELECT
+                PROPERTY_NO, REALTOR_ID, PROPERTY_NAME, PROPERTY_TYPE,
+                DEPOSIT, MONTHLY_RENT, ROAD_ADDRESS, CONTRACT_AREA,
+                STATUS, CREATED_AT, USER_ID, CONTRACT_STATUS, CONTRACT_AT,
+                -- 썸네일 경로만 조회
+                (SELECT IMG_PATH FROM PROPERTIES_IMG_TBL PI WHERE PI.PROPERTY_NO = PROPERTY_TBL.PROPERTY_NO AND PI.IMG_ORDER = 0 AND ROWNUM = 1) AS THUMBNAILPATH
+            FROM PROPERTY_TBL
+            <include refid="propertySearchWhere"/>
+            ORDER BY
+                <choose>
+                    <when test="sort == 'PRICE_ASC'">DEPOSIT ASC, MONTHLY_RENT ASC</when>
+                    <when test="sort == 'PRICE_DESC'">DEPOSIT DESC, MONTHLY_RENT DESC</when>
+                    <otherwise>CREATED_AT DESC</otherwise>
+                </choose>
+        </otherwise>
+    </choose>
+  </select>
+
+  <update id="updatePropertyStatus">
+    UPDATE PROPERTY_TBL
+    SET STATUS = #{newStatus, jdbcType=VARCHAR},
+        UPDATED_AT = SYSTIMESTAMP
+    WHERE PROPERTY_NO = #{propertyNo, jdbcType=NUMERIC}
+  </update>
+
+  <update id="softDeleteProperty">
+    UPDATE PROPERTY_TBL
+    SET STATUS = 'DELETED',
+        DELETED_AT = SYSTIMESTAMP
+    WHERE PROPERTY_NO = #{propertyNo, jdbcType=NUMERIC}
+    AND REALTOR_ID = #{realtorId, jdbcType=VARCHAR}
+    AND STATUS != 'DELETED'
+  </update>
+  
+  <sql id="propertySearchWhere">
+    <where>
+        REALTOR_ID = #{realtorId}
+        AND STATUS != 'DELETED'
+
+        <if test="STATUS != null and STATUS != 'ALL'">
+            AND STATUS = #{STATUS}
+        </if>
+
+        <if test="CONTRACT_STATUS != null and CONTRACT_STATUS != ''">
+            AND CONTRACT_STATUS = #{CONTRACT_STATUS}
+        </if>
+
+        <if test="PROPERTY_TYPE != null and PROPERTY_TYPE != 'ALL'">
+            AND UPPER(PROPERTY_TYPE) = #{PROPERTY_TYPE}
+        </if>
+
+        <if test="searchKeyword != null and searchKeyword != ''">
+            AND (
+                PROPERTY_NAME LIKE '%' || #{searchKeyword} || '%'
+                OR ROAD_ADDRESS LIKE '%' || #{searchKeyword} || '%'
+            )
+        </if>
+
+        </where>
+  </sql>
+
+  <!-- 매물 정보 수정 -->
+  <update id="updateProperty" parameterType="map">
+    UPDATE PROPERTY_TBL
+    SET STATUS = #{status},
+        PROPERTY_NAME = #{propertyName},
+        DEPOSIT = #{deposit},
+        MONTHLY_RENT = #{monthlyRent},
+        MAINTENANCE_FEE = #{maintenanceFee},
+        AVAILABLE_DATE = #{availableDate},
+        DESCRIPTION = #{description},
+        UPDATED_AT = SYSTIMESTAMP
+    WHERE PROPERTY_NO = #{propertyNo}
+      AND REALTOR_ID = #{realtorId}
+  </update>
+
+  <!-- 계약 완료 처리 -->
+  <update id="completeContract" parameterType="map">
+    UPDATE PROPERTY_TBL
+    SET USER_ID = #{buyerUserId, jdbcType=VARCHAR},
+        CONTRACT_STATUS = 'Y',
+        STATUS = 'COMPLETED',
+        CONTRACT_AT = SYSTIMESTAMP,
+        UPDATED_AT = SYSTIMESTAMP
+    WHERE PROPERTY_NO = #{propertyNo, jdbcType=NUMERIC}
+      AND REALTOR_ID = #{realtorId, jdbcType=VARCHAR}
+      AND STATUS != 'DELETED'
+      AND EXISTS (SELECT 1 FROM USER_TBL WHERE USER_ID = #{buyerUserId, jdbcType=VARCHAR})
+  </update>
+
+  <!-- 특정 사용자가 계약한 매물 목록 조회 -->
+  <select id="selectContractedPropertiesByUserId" resultType="com.elon.boot.domain.property.model.vo.Property">
+    SELECT
+        P.PROPERTY_NO,
+        P.REALTOR_ID,
+        P.USER_ID,
+        P.PROPERTY_NAME,
+        P.PROPERTY_TYPE,
+        P.DEPOSIT,
+        P.MONTHLY_RENT,
+        P.ROAD_ADDRESS,
+        P.PARCEL_ADDRESS,
+        P.CONTRACT_AREA,
+        P.STATUS,
+        P.CONTRACT_STATUS,
+        P.CONTRACT_AT,
+        P.CREATED_AT,
+        -- 썸네일 이미지 조회
+        (SELECT IMG_PATH FROM PROPERTIES_IMG_TBL PI WHERE PI.PROPERTY_NO = P.PROPERTY_NO AND PI.IMG_ORDER = 0 AND ROWNUM = 1) AS THUMBNAILPATH
+    FROM PROPERTY_TBL P
+    WHERE P.USER_ID = #{userId, jdbcType=VARCHAR}
+      AND P.CONTRACT_STATUS = #{CONTRACT_STATUS, jdbcType=VARCHAR}
+      AND P.STATUS != 'DELETED'
+    ORDER BY P.CONTRACT_AT DESC
+  </select>
+
+  <!-- 최근 등록 매물 5개 조회 (썸네일 이미지 포함) -->
+  <select id="selectRecentProperties" resultType="com.elon.boot.domain.property.model.vo.Property">
+    SELECT *
+    FROM (
+        SELECT
+            P.PROPERTY_NO,
+            P.REALTOR_ID,
+            P.PROPERTY_NAME,
+            P.PROPERTY_TYPE,
+            P.DEPOSIT,
+            P.MONTHLY_RENT,
+            P.ROAD_ADDRESS,
+            P.PARCEL_ADDRESS,
+            P.DISTRICT,
+            P.PROVINCE,
+            P.CREATED_AT,
+            P.STATUS,
+            -- 썸네일 이미지 조회 (IMG_ORDER = 0인 첫 번째 이미지)
+            (SELECT IMG_PATH
+             FROM PROPERTIES_IMG_TBL PI
+             WHERE PI.PROPERTY_NO = P.PROPERTY_NO
+             AND PI.IMG_ORDER = 0
+             AND ROWNUM = 1) AS THUMBNAILPATH
+        FROM PROPERTY_TBL P
+        WHERE P.STATUS = 'ACTIVE'
+        ORDER BY P.CREATED_AT DESC
+    )
+    WHERE ROWNUM <![CDATA[<=]]> 5
+  </select>
+
+</mapper>
